@@ -398,11 +398,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 40,
     width: "100%",
+    gap:2
   },
   scanButtonText: {
     fontSize: 15,
     color: colors.light,
     fontWeight: "bold",
+  },
+  scanButtonIcon:{
+    width: 20, height: 20
   },
   primaryTextContainer: {
     padding: 20,
