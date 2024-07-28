@@ -305,7 +305,7 @@ const HomeScreen = ({ navigation, route }) => {
                       onPress={() => handleProductPress(item)}
                       onAddToCart={() => handleAddToCart(item)}
                     />
-                  </View>
+                   </View>
                 )}
               />
             </View>
@@ -465,6 +465,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginLeft: 10,
     paddingTop: 0,
+    gap:10
   },
   productCardContainerEmpty: {
     padding: 10,

@@ -15,6 +15,7 @@ import CustomButton from "../../components/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 import CustomAlert from "../../components/CustomAlert/CustomAlert";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from 'expo-file-system';
 import ProgressDialog from "react-native-progress-dialog";
 import { AntDesign } from "@expo/vector-icons";
 import { useEffect } from "react";
@@ -97,7 +98,7 @@ const AddProductScreen = ({ navigation, route }) => {
   myHeaders.append("Content-Type", "application/json");
 
   const upload = async (uri) => {
-
+console.log("object upload", uri);
     var formdata = new FormData();
     formdata.append("photos", uri, "product.png");
     var ImageRequestOptions = {
@@ -145,9 +146,19 @@ const AddProductScreen = ({ navigation, route }) => {
       quality: 0.5,
     });
 
-    if (!result?.cancelled) {
-      setImage(result.assets[0].uri);
-      upload(result.assets[0].uri);
+    if (!result.cancelled) {
+      console.log(result);
+      try {
+      const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const base64Image = `data:image/jpeg;base64,${base64}`;
+      console.log(base64Image);
+      setImage(base64Image);
+        upload(base64Image);
+      } catch (error) {
+        console.log("object",error);
+      }
     }
   };
 

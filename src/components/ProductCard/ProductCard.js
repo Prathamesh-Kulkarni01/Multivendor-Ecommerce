@@ -14,7 +14,7 @@ const ProductCard = ({
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.container, { width: cardSize === "large" ? "100%" : 150 }]}
+      style={[styles.container, { width: cardSize === "large" ? "100%" : 165 }]}
       onPress={onPress}
     >
       <View style={styles.imageContainer}>
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     padding: 5,
+    margin:8,
     elevation: 5,
   },
   imageContainer: {
