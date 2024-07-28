@@ -18,6 +18,85 @@ import InternetConnectionAlert from "react-native-internet-connection-alert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ProgressDialog from "react-native-progress-dialog";
 
+const CARDS = {
+  admin: (result) => [
+    {
+      id: 1,
+      title: "Users",
+      value: result.data?.usersCount,
+      iconName: "person",
+      type: "primary",
+      screenName: "viewusers",
+    },
+    {
+      id: 54,
+      title: "Vendors",
+      value: result.data?.vendorsCount,
+      iconName: "cart",
+      type: "primary",
+      screenName: "viewvendors",
+    },
+    {
+      id: 2,
+      title: "Orders",
+      value: result.data?.ordersCount,
+      iconName: "cart",
+      type: "secondary",
+      screenName: "vieworder",
+    },
+    {
+      id: 3,
+      title: "Products",
+      value: result.data?.productsCount,
+      iconName: "md-square",
+      type: "warning",
+      screenName: "viewproduct",
+    },
+    {
+      id: 4,
+      title: "Categories",
+      value: result.data?.categoriesCount,
+      iconName: "menu",
+      type: "muted",
+      screenName: "viewcategories",
+    },
+  ],
+  vendor: (result) => [
+    {
+      id: 1,
+      title: "Users",
+      value: result.data?.usersCount,
+      iconName: "person",
+      type: "parimary",
+      screenName: "viewusers",
+    },
+    {
+      id: 2,
+      title: "Orders",
+      value: result.data?.ordersCount,
+      iconName: "cart",
+      type: "secondary",
+      screenName: "vieworder",
+    },
+    {
+      id: 3,
+      title: "Products",
+      value: result.data?.productsCount,
+      iconName: "md-square",
+      type: "warning",
+      screenName: "viewproduct",
+    },
+    {
+      id: 4,
+      title: "Categories",
+      value: result.data?.categoriesCount,
+      iconName: "menu",
+      type: "muted",
+      screenName: "viewcategories",
+    },
+  ],
+};
+
 const DashboardScreen = ({ navigation, route }) => {
   const { authUser } = route.params;
   const [user, setUser] = useState(authUser);
@@ -26,6 +105,8 @@ const DashboardScreen = ({ navigation, route }) => {
   const [isloading, setIsloading] = useState(false);
   const [data, setData] = useState([]);
   const [refeshing, setRefreshing] = useState(false);
+
+  const isAdmin = user.userType === "ADMIN";
 
   //method to remove the auth user from async storage and navigate the login if token expires
   const logout = async () => {
@@ -42,47 +123,21 @@ const DashboardScreen = ({ navigation, route }) => {
     redirect: "follow",
   };
 
+  const getMyCards = (result) => {
+    if (isAdmin) {
+      return CARDS.admin(result);
+    }
+    return CARDS.vendor(result);
+  };
   //method the fetch the statistics from server using API call
   const fetchStats = () => {
-    fetch(`${network.serverip}/dashboard`, requestOptions)
+    const userType=isAdmin?'admin':"vendor"
+    fetch(`${network.serverip}/${userType}/dashboard`, requestOptions)
       .then((response) => response.json())
       .then((result) => {
         if (result.success == true) {
           //set the fetched data to Data state
-          setData([
-            {
-              id: 1,
-              title: "Users",
-              value: result.data?.usersCount,
-              iconName: "person",
-              type: "parimary",
-              screenName: "viewusers",
-            },
-            {
-              id: 2,
-              title: "Orders",
-              value: result.data?.ordersCount,
-              iconName: "cart",
-              type: "secondary",
-              screenName: "vieworder",
-            },
-            {
-              id: 3,
-              title: "Products",
-              value: result.data?.productsCount,
-              iconName: "md-square",
-              type: "warning",
-              screenName: "viewproduct",
-            },
-            {
-              id: 4,
-              title: "Categories",
-              value: result.data?.categoriesCount,
-              iconName: "menu",
-              type: "muted",
-              screenName: "viewcategories",
-            },
-          ]);
+          setData(getMyCards(result));
           setError("");
           setIsloading(false);
         } else {
@@ -144,28 +199,33 @@ const DashboardScreen = ({ navigation, route }) => {
         </View>
         <View style={{ height: 370 }}>
           {data && (
-            <ScrollView
+            <FlatList
+              data={data}
+              horizontal
+              renderItem={({ item }) => (
+                <CustomCard
+                  key={item.id}
+                  iconName={item.iconName}
+                  title={item.title}
+                  value={item.value}
+                  type={item.type}
+                  onPress={() => {
+                    navigation.navigate(item.screenName, { authUser: user });
+                  }}
+                />
+              )}
+              keyExtractor={(item) => item.id.toString()}
               refreshControl={
                 <RefreshControl
                   refreshing={refeshing}
                   onRefresh={handleOnRefresh}
                 />
               }
-              contentContainerStyle={styles.cardContainer}
-            >
-              {data.map((data) => (
-                <CustomCard
-                  key={data.id}
-                  iconName={data.iconName}
-                  title={data.title}
-                  value={data.value}
-                  type={data.type}
-                  onPress={() => {
-                    navigation.navigate(data.screenName, { authUser: user });
-                  }}
-                />
-              ))}
-            </ScrollView>
+              contentContainerStyle={[
+                styles.cardContainer,
+                { flexDirection: "column" },
+              ]}
+            />
           )}
         </View>
         <View style={styles.headingContainer}>

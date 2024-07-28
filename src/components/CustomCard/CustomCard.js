@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
-    width: 170,
+    width: 180,
     height: 170,
     backgroundColor: colors.white,
     padding: 20,
