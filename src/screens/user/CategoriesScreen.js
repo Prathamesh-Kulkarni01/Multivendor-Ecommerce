@@ -16,46 +16,39 @@ import cartIcon from "../../assets/icons/cart_beg.png";
 import emptyBox from "../../assets/image/emptybox.png";
 import { colors, network } from "../../constants";
 import { useSelector, useDispatch } from "react-redux";
-import { bindActionCreators } from "redux";
-import * as actionCreaters from "../../states/actionCreaters/actionCreaters";
+import { cartAdd } from '../../states/slices/cartSlice';
 import CustomIconButton from "../../components/CustomIconButton/CustomIconButton";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import CustomInput from "../../components/CustomInput";
 
 const CategoriesScreen = ({ navigation, route }) => {
   const { categoryID } = route.params;
-
   const [isLoading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
-  const [refeshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [label, setLabel] = useState("Loading...");
   const [error, setError] = useState("");
   const [foundItems, setFoundItems] = useState([]);
   const [filterItem, setFilterItem] = useState("");
 
-  //get the dimenssions of active window
-  const [windowWidth, setWindowWidth] = useState(
-    Dimensions.get("window").width
-  );
+  // Get the dimensions of the active window
+  const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height;
 
-  //initialize the cartproduct with redux data
-  const cartproduct = useSelector((state) => state.product);
+  // Initialize the cart product with redux data
   const dispatch = useDispatch();
+  const cartProduct = useSelector((state) => state.cart);
+  
 
-  const { addCartItem } = bindActionCreators(actionCreaters, dispatch);
-
-  //method to navigate to product detail screen of specific product
+  // Method to navigate to product detail screen of a specific product
   const handleProductPress = (product) => {
     navigation.navigate("productdetail", { product: product });
   };
+  const handleAddToCart = (product) => {
+    dispatch(cartAdd(product));
+};
 
-  //method to add the product to cart (redux)
-  const handleAddToCat = (product) => {
-    addCartItem(product);
-  };
-
-  //method call on pull refresh
+  // Method call on pull refresh
   const handleOnRefresh = () => {
     setRefreshing(true);
     fetchProduct();
@@ -113,14 +106,17 @@ const CategoriesScreen = ({ navigation, route }) => {
       });
   };
 
-  //listener call on tab focus and initlize categoryID
-  navigation.addListener("focus", () => {
-    if (categoryID) {
-      setSelectedTab(categoryID);
-    }
-  });
+  // Listener call on tab focus and initialize categoryID
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      if (categoryID) {
+        setSelectedTab(categoryID);
+      }
+    });
+    return unsubscribe;
+  }, [navigation, categoryID]);
 
-  //method to filter the product according to user search in selected category
+  // Method to filter the product according to user search in selected category
   const filter = () => {
     const keyword = filterItem;
     if (keyword !== "") {
@@ -134,19 +130,19 @@ const CategoriesScreen = ({ navigation, route }) => {
     }
   };
 
-  //render whenever the value of filterItem change
+  // Render whenever the value of filterItem changes
   useEffect(() => {
     filter();
   }, [filterItem]);
 
-  //fetch the product on initial render
+  // Fetch the product on initial render
   useEffect(() => {
     fetchProduct();
   }, []);
 
   return (
     <View style={styles.container}>
-      <StatusBar></StatusBar>
+      <StatusBar />
       <View style={styles.topBarContainer}>
         <TouchableOpacity
           onPress={() => {
@@ -165,13 +161,11 @@ const CategoriesScreen = ({ navigation, route }) => {
           style={styles.cartIconContainer}
           onPress={() => navigation.navigate("cart")}
         >
-          {cartproduct?.length > 0 ? (
+          {cartProduct?.length > 0 ? (
             <View style={styles.cartItemCountContainer}>
-              <Text style={styles.cartItemCountText}>{cartproduct.length}</Text>
+              <Text style={styles.cartItemCountText}>{cartProduct.length}</Text>
             </View>
-          ) : (
-            <></>
-          )}
+          ) : null}
           <Image source={cartIcon} />
         </TouchableOpacity>
       </View>
@@ -186,17 +180,16 @@ const CategoriesScreen = ({ navigation, route }) => {
         </View>
         <FlatList
           data={category}
-          keyExtractor={(index, item) => `${index}-${item}`}
+          keyExtractor={(item) => item._id}
           horizontal
           style={{ flexGrow: 0 }}
           contentContainerStyle={{ padding: 10 }}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item: tab }) => (
             <CustomIconButton
-              key={tab}
               text={tab.title}
               image={tab.image}
-              active={selectedTab?.title === tab.title ? true : false}
+              active={selectedTab?._id === tab._id}
               onPress={() => {
                 setSelectedTab(tab);
               }}
@@ -208,23 +201,13 @@ const CategoriesScreen = ({ navigation, route }) => {
           (product) => product?.category?._id === selectedTab?._id
         ).length === 0 ? (
           <View style={styles.noItemContainer}>
-            <View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: colors.white,
-                height: 150,
-                width: 150,
-                borderRadius: 10,
-              }}
-            >
+            <View style={styles.emptyBox}>
               <Image
                 source={emptyBox}
                 style={{ height: 80, width: 80, resizeMode: "contain" }}
               />
               <Text style={styles.emptyBoxText}>
-                There no product in this category
+                There are no products in this category
               </Text>
             </View>
           </View>
@@ -235,11 +218,11 @@ const CategoriesScreen = ({ navigation, route }) => {
             )}
             refreshControl={
               <RefreshControl
-                refreshing={refeshing}
+                refreshing={refreshing}
                 onRefresh={handleOnRefresh}
               />
             }
-            keyExtractor={(index, item) => `${index}-${item}`}
+            keyExtractor={(item) => item._id}
             contentContainerStyle={{ margin: 10 }}
             numColumns={2}
             renderItem={({ item: product }) => (
@@ -256,7 +239,7 @@ const CategoriesScreen = ({ navigation, route }) => {
                   price={product.price}
                   quantity={product.quantity}
                   onPress={() => handleProductPress(product)}
-                  onPressSecondary={() => handleAddToCat(product)}
+                  onPressSecondary={() => handleAddToCart(product)}
                 />
                 <View style={styles.emptyView}></View>
               </View>
@@ -341,6 +324,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
+  },
+  emptyBox: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.white,
+    height: 150,
+    width: 150,
+    borderRadius: 10,
+  },
+  emptyBoxImage: {
+    height: 80,
+    width: 80,
+    resizeMode: "contain",
   },
   emptyBoxText: {
     fontSize: 11,

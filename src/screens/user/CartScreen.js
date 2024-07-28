@@ -15,40 +15,42 @@ import CartProductList from "../../components/CartProductList/CartProductList";
 import CustomButton from "../../components/CustomButton";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
-import * as actionCreaters from "../../states/actionCreaters/actionCreaters";
-import { bindActionCreators } from "redux";
+import {
+  cartAdd,
+  cartRemove,
+  increaseCartItemQuantity,
+  decreaseCartItemQuantity,
+  emptyCart
+} from "../../states/slices/cartSlice";
 
 const CartScreen = ({ navigation }) => {
-  const cartproduct = useSelector((state) => state.product);
+  const cartproduct = useSelector((state) => state.cart);
   const [totalPrice, setTotalPrice] = useState(0);
   const [refresh, setRefresh] = useState(false);
   const dispatch = useDispatch();
 
-  const { removeCartItem, increaseCartItemQuantity, decreaseCartItemQuantity } =
-    bindActionCreators(actionCreaters, dispatch);
-
-  //method to remove the item from (cart) redux
+  // Method to remove the item from (cart) redux
   const deleteItem = (id) => {
-    removeCartItem(id);
+    dispatch(cartRemove(id));
   };
 
-  //method to increase the quantity of the item in(cart) redux
+  // Method to increase the quantity of the item in (cart) redux
   const increaseQuantity = (id, quantity, avaiableQuantity) => {
     if (avaiableQuantity > quantity) {
-      increaseCartItemQuantity({ id: id, type: "increase" });
+      dispatch(increaseCartItemQuantity({ id, type: "increase" }));
       setRefresh(!refresh);
     }
   };
 
-  //method to decrease the quantity of the item in(cart) redux
+  // Method to decrease the quantity of the item in (cart) redux
   const decreaseQuantity = (id, quantity) => {
     if (quantity > 1) {
-      decreaseCartItemQuantity({ id: id, type: "decrease" });
+      dispatch(decreaseCartItemQuantity({ id, type: "decrease" }));
       setRefresh(!refresh);
     }
   };
 
-  //calcute and the set the total price whenever the value of carproduct change
+  // Calculate and set the total price whenever the value of carproduct changes
   useEffect(() => {
     setTotalPrice(
       cartproduct.reduce((accumulator, object) => {
@@ -79,7 +81,6 @@ const CartScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View></View>
         <TouchableOpacity>
           <Image source={cartIcon} />
         </TouchableOpacity>
@@ -158,7 +159,6 @@ export default CartScreen;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    flexDirecion: "row",
     backgroundColor: colors.light,
     alignItems: "center",
     justifyContent: "flex-start",

@@ -13,8 +13,7 @@ import BasicProductList from "../../components/BasicProductList/BasicProductList
 import { colors, network } from "../../constants";
 import CustomButton from "../../components/CustomButton";
 import { useSelector, useDispatch } from "react-redux";
-import * as actionCreaters from "../../states/actionCreaters/actionCreaters";
-import { bindActionCreators } from "redux";
+import { emptyCart } from "../../states/slices/cartSlice"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomInput from "../../components/CustomInput";
 import ProgressDialog from "react-native-progress-dialog";
@@ -22,9 +21,8 @@ import ProgressDialog from "react-native-progress-dialog";
 const CheckoutScreen = ({ navigation, route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isloading, setIsloading] = useState(false);
-  const cartproduct = useSelector((state) => state.product);
+  const cartproduct = useSelector((state) => state.cart); 
   const dispatch = useDispatch();
-  const { emptyCart } = bindActionCreators(actionCreaters, dispatch);
 
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
@@ -34,13 +32,13 @@ const CheckoutScreen = ({ navigation, route }) => {
   const [streetAddress, setStreetAddress] = useState("");
   const [zipcode, setZipcode] = useState("");
 
-  //method to remove the authUser from aysnc storage and navigate to login
+  // Method to remove the authUser from async storage and navigate to login
   const logout = async () => {
     await AsyncStorage.removeItem("authUser");
     navigation.replace("login");
   };
 
-  //method to handle checkout
+  // Method to handle checkout
   const handleCheckout = async () => {
     setIsloading(true);
     var myHeaders = new Headers();
@@ -51,8 +49,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     myHeaders.append("x-auth-token", user.token);
     myHeaders.append("Content-Type", "application/json");
 
-    var payload = [];
-    var totalamount = 0;
+    const payload = [];
+    let totalamount = 0;
 
     // fetch the cart items from redux and set the total cost
     cartproduct.forEach((product) => {
@@ -65,36 +63,33 @@ const CheckoutScreen = ({ navigation, route }) => {
       payload.push(obj);
     });
 
-    var raw = JSON.stringify({
+    const raw = JSON.stringify({
       items: payload,
       amount: totalamount,
       discount: 0,
       payment_type: "cod",
-      country: country,
+      country,
       status: "pending",
-      city: city,
-      zipcode: zipcode,
+      city,
+      zipcode,
       shippingAddress: streetAddress,
     });
 
-    var requestOptions = {
+    const requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: raw,
       redirect: "follow",
     };
 
-    fetch(network.serverip + "/checkout", requestOptions) //API call
+    fetch(`${network.serverip}/checkout`, requestOptions) // API call
       .then((response) => response.json())
       .then((result) => {
-        console.log("Checkout=>", result);
+        setIsloading(false);
         if (result.err === "jwt expired") {
-          setIsloading(false);
           logout();
-        }
-        if (result.success == true) {
-          setIsloading(false);
-          emptyCart("empty");
+        } else if (result.success) {
+          dispatch(emptyCart("empty"));
           navigation.replace("orderconfirm");
         }
       })
@@ -104,23 +99,23 @@ const CheckoutScreen = ({ navigation, route }) => {
       });
   };
 
-  // set the address and total cost on initital render
+  // Set the address and total cost on initial render
   useEffect(() => {
-    if (streetAddress && city && country != "") {
-      setAddress(`${streetAddress}, ${city},${country}`);
+    if (streetAddress && city && country) {
+      setAddress(`${streetAddress}, ${city}, ${country}`);
     } else {
       setAddress("");
     }
     setTotalCost(
-      cartproduct.reduce((accumulator, object) => {
-        return accumulator + object.price * object.quantity;
+      cartproduct.reduce((accumulator, product) => {
+        return accumulator + product.price * product.quantity;
       }, 0)
     );
-  }, []);
+  }, [cartproduct, streetAddress, city, country]);
 
   return (
     <View style={styles.container}>
-      <StatusBar></StatusBar>
+      <StatusBar />
       <ProgressDialog visible={isloading} label={"Placing Order..."} />
       <View style={styles.topBarContainer}>
         <TouchableOpacity
@@ -190,14 +185,14 @@ const CheckoutScreen = ({ navigation, route }) => {
           >
             <Text style={styles.secondaryTextSm}>Address</Text>
             <View>
-              {country || city || streetAddress != "" ? (
+              {country || city || streetAddress ? (
                 <Text
                   style={styles.secondaryTextSm}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
                   {address.length < 25
-                    ? `${address}`
+                    ? address
                     : `${address.substring(0, 25)}...`}
                 </Text>
               ) : (
@@ -217,13 +212,10 @@ const CheckoutScreen = ({ navigation, route }) => {
         <View style={styles.emptyView}></View>
       </ScrollView>
       <View style={styles.buttomContainer}>
-        {country && city && streetAddress != "" ? (
+        {country && city && streetAddress ? (
           <CustomButton
             text={"Submit Order"}
-            // onPress={() => navigation.replace("orderconfirm")}
-            onPress={() => {
-              handleCheckout();
-            }}
+            onPress={handleCheckout}
           />
         ) : (
           <CustomButton text={"Submit Order"} disabled />
@@ -303,10 +295,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  toBarText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
   bodyContainer: {
     flex: 1,
     paddingLeft: 20,
@@ -334,7 +322,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
     backgroundColor: colors.white,
     height: 50,
     borderBottomWidth: 1,

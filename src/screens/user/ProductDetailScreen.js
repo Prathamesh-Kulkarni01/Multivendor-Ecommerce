@@ -5,8 +5,7 @@ import cartIcon from "../../assets/icons/cart_beg.png";
 import {colors, network} from "../../constants";
 import CustomButton from "../../components/CustomButton";
 import {useSelector, useDispatch} from "react-redux";
-import {bindActionCreators} from "redux";
-import * as actionCreaters from "../../states/actionCreaters/actionCreaters";
+import { cartAdd } from '../../states/slices/cartSlice';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "../../components/CustomAlert/CustomAlert";
 // import HTML from "react-native-render-html";
@@ -17,15 +16,15 @@ const renderHTMLContent = (htmlContent) => {
 
 const ProductDetailScreen = ({navigation, route}) => {
     const {product} = route.params;
-    const cartproduct = useSelector((state) => state.product);
     const dispatch = useDispatch();
 
-    const {addCartItem} = bindActionCreators(actionCreaters, dispatch);
+    const cartItems = useSelector((state) => state.cart);
 
-    //method to add item to cart(redux)
     const handleAddToCat = (item) => {
-        addCartItem(item);
+        console.log("calling");
+        dispatch(cartAdd(item));
     };
+
 
     //remove the authUser from async storage and navigate to login
     const logout = async () => {
@@ -183,7 +182,7 @@ const ProductDetailScreen = ({navigation, route}) => {
 
     //render whenever the value of wishlistItems change
     useEffect(() => {}, [wishlistItems]);
-    console.log("img", productImage);
+
     return (
         <View style={styles.container}>
             <StatusBar />
@@ -198,9 +197,9 @@ const ProductDetailScreen = ({navigation, route}) => {
 
                 <View></View>
                 <TouchableOpacity style={styles.cartIconContainer} onPress={() => navigation.navigate("cart")}>
-                    {cartproduct.length > 0 ? (
+                    {cartItems?.length > 0 ? (
                         <View style={styles.cartItemCountContainer}>
-                            <Text style={styles.cartItemCountText}>{cartproduct.length}</Text>
+                            <Text style={styles.cartItemCountText}>{cartItems?.length}</Text>
                         </View>
                     ) : (
                         <></>
