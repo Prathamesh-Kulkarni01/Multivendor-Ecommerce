@@ -67,7 +67,6 @@ const SignupScreen = ({ navigation }) => {
     fetch(network.serverip + "/register", requestOptions) // API call
       .then((response) => response.json())
       .then((result) => {
-        console.log(result);
         if (result.data["email"] == email) {
           navigation.navigate("login");
         }

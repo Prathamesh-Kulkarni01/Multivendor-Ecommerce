@@ -237,9 +237,9 @@ const DashboardScreen = ({ navigation, route }) => {
             <OptionList
               text={"Products"}
               Icon={Ionicons}
-              iconName={"md-square"}
+              iconName={"bag-handle"}
               onPress={() =>
-                navigation.navigate("viewproduct", { authUser: user })
+                navigation.navigate("viewproduct", { authUser: user,vendor:!isAdmin&&user._id })
               }
               onPressSecondary={() =>
                 navigation.navigate("addproduct", { authUser: user })

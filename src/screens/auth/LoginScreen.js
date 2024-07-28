@@ -85,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
           result.status == 200 ||
           (result.status == 1 && result.success != false)
         ) {
-          if (result?.data?.userType == "ADMIN") {
+          if (result?.data?.userType == "ADMIN"||result?.data?.userType == "VENDOR") {
             //check the user type if the type is ADMIN then navigate to Dashboard else navigate to User Home
             _storeData(result.data);
             setIsloading(false);

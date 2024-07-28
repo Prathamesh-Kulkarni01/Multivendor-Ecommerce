@@ -2,10 +2,11 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../constants";
+import { TouchableOpacity } from "react-native";
 
-const UserList = ({ username, email }) => {
+const UserList = ({ username, email, onPress = () => {} }) => {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.profileContainer}>
         <Ionicons
           name="person-circle-outline"
@@ -17,7 +18,7 @@ const UserList = ({ username, email }) => {
         <Text style={styles.usernameText}>{username}</Text>
         <Text style={styles.userEmailText}>{email}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -100,7 +100,6 @@ const AddProductScreen = ({ navigation, route }) => {
 
     var formdata = new FormData();
     formdata.append("photos", uri, "product.png");
-console.log("image2",uri);
     var ImageRequestOptions = {
       method: "POST",
       body: formdata,
@@ -126,6 +125,7 @@ console.log("image2",uri);
     description: description,
     category: category,
     quantity: quantity,
+    createdBy:user._id,
   });
 
   var requestOptions = {
@@ -146,8 +146,6 @@ console.log("image2",uri);
     });
 
     if (!result?.cancelled) {
-      console.log("result",result);
-      console.log(result);
       setImage(result.assets[0].uri);
       upload(result.assets[0].uri);
     }
@@ -175,7 +173,6 @@ console.log("image2",uri);
       fetch(network.serverip + "/product", requestOptions)
         .then((response) => response.json())
         .then((result) => {
-          console.log(result);
           if (result.success == true) {
             setIsloading(false);
             setAlertType("success");
@@ -194,7 +191,6 @@ console.log("image2",uri);
   //call the fetch functions initial render
   useEffect(() => {
     fetchCategories();
-    console.log(categories);
   }, []);
 
   return (

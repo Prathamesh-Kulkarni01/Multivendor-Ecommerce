@@ -18,7 +18,7 @@ import CustomInput from "../../components/CustomInput/";
 import ProgressDialog from "react-native-progress-dialog";
 
 const ViewProductScreen = ({ navigation, route }) => {
-  const { authUser } = route.params;
+  const { authUser,vendor } = route.params;
   const [isloading, setIsloading] = useState(false);
   const [refeshing, setRefreshing] = useState(false);
   const [alertType, setAlertType] = useState("error");
@@ -70,7 +70,6 @@ const ViewProductScreen = ({ navigation, route }) => {
       .catch((error) => {
         setIsloading(false);
         setError(error.message);
-        console.log("error", error);
       });
   };
 
@@ -96,7 +95,7 @@ const ViewProductScreen = ({ navigation, route }) => {
   //method the fetch the product data from server using API call
   const fetchProduct = () => {
     setIsloading(true);
-    fetch(`${network.serverip}/products`, ProductListRequestOptions)
+    fetch(`${network.serverip}/products/${vendor}`, ProductListRequestOptions)
       .then((response) => response.json())
       .then((result) => {
         if (result.success) {
@@ -111,7 +110,6 @@ const ViewProductScreen = ({ navigation, route }) => {
       })
       .catch((error) => {
         setError(error.message);
-        console.log("error", error);
         setIsloading(false);
       });
   };
