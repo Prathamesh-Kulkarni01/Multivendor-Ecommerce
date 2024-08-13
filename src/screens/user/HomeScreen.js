@@ -25,6 +25,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ProductSkeleton from "../../components/Skeltons/ProductSkelton";
 import { useSelector, useDispatch } from "react-redux";
 import { addCartItem } from "../../states/slices/cartSlice";
+import QuotationFormDialog from "../../utilities/QuotationFormDialog";
+import PrintPdf from "../../utilities/PrintPdf";
 
 const category = [
   {
@@ -74,6 +76,11 @@ const HomeScreen = ({ navigation, route }) => {
   const [error, setError] = useState("");
   const [userInfo, setUserInfo] = useState({});
   const [searchItems, setSearchItems] = useState([]);
+  const [isDialogVisible, setDialogVisible] = useState(false);
+
+  const toggleDialog = () => {
+    setDialogVisible((d)=>!d);
+  };
 
   const convertToJSON = (obj) => {
     try {
@@ -156,6 +163,7 @@ const HomeScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <StatusBar />
       <View style={styles.topBarContainer}>
+        <PrintPdf/>
         <TouchableOpacity disabled>
           <Ionicons name="menu" size={30} color={colors.muted} />
         </TouchableOpacity>
@@ -267,9 +275,7 @@ const HomeScreen = ({ navigation, route }) => {
               <CustomButton
                 icon="clipboard-sharp"
                 text={"Ask Quote"}
-                onPress={() => {
-                  // handleAddToCart(product);
-                }}
+                onPress={toggleDialog}
               />
             </View>
           </View>
@@ -305,13 +311,14 @@ const HomeScreen = ({ navigation, route }) => {
                       onPress={() => handleProductPress(item)}
                       onAddToCart={() => handleAddToCart(item)}
                     />
-                   </View>
+                  </View>
                 )}
               />
             </View>
           )}
         </ScrollView>
       </View>
+      <QuotationFormDialog isVisible={isDialogVisible} onClose={toggleDialog} />
     </View>
   );
 };
@@ -398,15 +405,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 40,
     width: "100%",
-    gap:2
+    gap: 2,
   },
   scanButtonText: {
     fontSize: 15,
     color: colors.light,
     fontWeight: "bold",
   },
-  scanButtonIcon:{
-    width: 20, height: 20
+  scanButtonIcon: {
+    width: 20,
+    height: 20,
   },
   primaryTextContainer: {
     padding: 20,
@@ -465,7 +473,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginLeft: 10,
     paddingTop: 0,
-    gap:10
+    gap: 10,
   },
   productCardContainerEmpty: {
     padding: 10,
