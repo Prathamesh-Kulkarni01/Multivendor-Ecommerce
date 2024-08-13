@@ -17,7 +17,6 @@ import CustomAlert from "../../components/CustomAlert/CustomAlert";
 import ProgressDialog from "react-native-progress-dialog";
 import InternetConnectionAlert from "react-native-internet-connection-alert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Layout } from "@ui-kitten/components";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -169,9 +168,6 @@ const LoginScreen = ({ navigation }) => {
             signup
           </Text>
         </View>
-        <Layout style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-    <Text category='h1'>HOME</Text>
-  </Layout>
         <Text>Developed by Goashta Technologies</Text>
       </KeyboardAvoidingView>
     </InternetConnectionAlert>
