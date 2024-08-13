@@ -22,7 +22,8 @@
       "package": "com.buildmart360.com"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "build": { "babel": { "include": [ "@ui-kitten/components" ] } }
     },
     "extra": {
       "eas": {
