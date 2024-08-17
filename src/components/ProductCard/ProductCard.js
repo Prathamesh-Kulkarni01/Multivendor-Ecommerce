@@ -22,7 +22,7 @@ const ProductCard = ({
       </View>
       <View style={styles.infoContainer}>
         <View>
-          <Text style={styles.secondaryTextSm}>{`${name.substring(
+          <Text style={styles.secondaryTextSm}>{`${name?.substring(
             0,
             10
           )}..`}</Text>

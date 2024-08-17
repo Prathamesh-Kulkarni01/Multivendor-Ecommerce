@@ -26,7 +26,6 @@ import ProductSkeleton from "../../components/Skeltons/ProductSkelton";
 import { useSelector, useDispatch } from "react-redux";
 import { addCartItem } from "../../states/slices/cartSlice";
 import QuotationFormDialog from "../../utilities/QuotationFormDialog";
-import PrintPdf from "../../utilities/PrintPdf";
 
 const category = [
   {
@@ -50,12 +49,12 @@ const category = [
     image: require("../../assets/icons/grocery.png"),
   },
   {
-    _id: "62fe246858f7aa8230817f8c",
+    _id: "62fe246858f7aa8230817f8d", // Corrected ID
     title: "TMT Bars",
     image: require("../../assets/icons/grocery.png"),
   },
   {
-    _id: "62fe246858f7aa8230817f8c",
+    _id: "62fe246858f7aa8230817f8e", // Corrected ID
     title: "Sand",
     image: require("../../assets/icons/grocery.png"),
   },
@@ -79,7 +78,7 @@ const HomeScreen = ({ navigation, route }) => {
   const [isDialogVisible, setDialogVisible] = useState(false);
 
   const toggleDialog = () => {
-    setDialogVisible((d)=>!d);
+    setDialogVisible((d) => !d);
   };
 
   const convertToJSON = (obj) => {
@@ -91,7 +90,7 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const handleProductPress = (product) => {
-    navigation.navigate("productdetail", { product: product });
+    navigation.navigate("productdetail", { product });
   };
 
   const handleAddToCart = (product) => {
@@ -163,7 +162,6 @@ const HomeScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <StatusBar />
       <View style={styles.topBarContainer}>
-        <PrintPdf/>
         <TouchableOpacity disabled>
           <Ionicons name="menu" size={30} color={colors.muted} />
         </TouchableOpacity>
@@ -248,8 +246,8 @@ const HomeScreen = ({ navigation, route }) => {
               data={category}
               numColumns={3}
               keyExtractor={(item) => item._id}
-              renderItem={({ item, index }) => (
-                <View style={styles.categoryItem} key={index}>
+              renderItem={({ item }) => (
+                <View style={styles.categoryItem}>
                   <CustomIconButton
                     text={item.title}
                     image={item.image}
@@ -275,7 +273,7 @@ const HomeScreen = ({ navigation, route }) => {
               <CustomButton
                 icon="clipboard-sharp"
                 text={"Ask Quote"}
-                onPress={toggleDialog}
+                onPress={()=>toggleDialog()}
               />
             </View>
           </View>
@@ -328,7 +326,6 @@ const bannerHeight = 200;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    flexDirecion: "row",
     backgroundColor: colors.light,
     alignItems: "center",
     justifyContent: "flex-start",

@@ -13,6 +13,7 @@ import CustomAlert from "../../components/CustomAlert/CustomAlert";
 import ProgressDialog from "react-native-progress-dialog";
 import BasicProductList from "../../components/BasicProductList/BasicProductList";
 import StepIndicator from "react-native-step-indicator";
+import PrintPdf from "../../utilities/PrintPdf";
 
 const MyOrderDetailScreen = ({ navigation, route }) => {
   const { orderDetail } = route.params;
@@ -109,6 +110,8 @@ const MyOrderDetailScreen = ({ navigation, route }) => {
     }
   }, []);
 
+
+  console.log(orderDetail);
   return (
     <View style={styles.container}>
       <ProgressDialog visible={isloading} label={label} />
@@ -213,6 +216,7 @@ const MyOrderDetailScreen = ({ navigation, route }) => {
             <Text style={styles.orderItemText}>Total</Text>
             <Text>₹ {totalCost}</Text>
           </View>
+          <PrintPdf type="invoice" data={ orderDetail} />
         </View>
         <View style={styles.emptyView}></View>
       </ScrollView>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, View, StyleSheet, ScrollView, TextInput } from "react-native";
 import {
   Layout,
@@ -8,19 +8,50 @@ import {
   Select,
   SelectItem,
   Datepicker,
-  CheckBox,
 } from "@ui-kitten/components";
 import * as yup from "yup";
 import { Formik } from "formik";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { network } from "../constants";
 
 const QuotationFormDialog = ({ isVisible, onClose }) => {
   const [step, setStep] = useState(1);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [date, setDate] = useState(new Date());
   const [customProduct, setCustomProduct] = useState("");
+  const [materials, setMaterials] = useState([]); // Store fetched materials
+  const [error, setError] = useState("");
 
-  const materials = ["Cement", "Bricks", "Sand", "Steel", "Tiles"];
+  // Fetch products function
+  const fetchProducts = async () => {
+    const headerOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    try {
+      const response = await fetch(`${network.serverip}/products`, headerOptions);
+      const result = await response.json();
+
+      if (result.success) {
+        setMaterials(result.data.map(product => product.title)); // Use product titles as materials
+        await AsyncStorage.setItem("products", JSON.stringify(result.data));
+      } else {
+        setError(result.message);
+      }
+    } catch (error) {
+      setError(error.message);
+      console.log("error", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchProducts(); // Fetch products when the dialog is visible
+    }
+  }, [isVisible]);
+
   const deliveryOptions = ["Pickup", "Home Delivery"];
 
   const handleMaterialSelect = (index) => {
@@ -100,19 +131,19 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
     <Modal visible={isVisible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
         <Layout style={styles.modalContent}>
-            
-        <View style={styles.header}>
+          <View style={styles.header}>
             <Text category="h5" style={styles.title}>
               Quotation Request
-                      </Text>
-                      <Button
+            </Text>
+            <Button
               appearance="ghost"
               status="basic"
-              onPress={()=>onClose()}
-              accessoryLeft={() => <Ionicons name="close" size={30}/>}
+              onPress={() => onClose()}
+              accessoryLeft={() => <Ionicons name="close" size={30} />}
             />
           </View>
-          
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <Formik
             initialValues={{
@@ -154,7 +185,6 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                         <SelectItem key={index} title={material} />
                       ))}
                     </Select>
-
                     {selectedMaterials.length > 0 && (
                       <ScrollView
                         style={styles.table}
@@ -172,13 +202,12 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                               keyboardType="numeric"
                             />
                             <Button
-                              style={styles.deleteButton}
-                              appearance="ghost"
-                              status="danger"
+                              // style={styles.deleteButton}
+                              appearance='ghost'
+      status='danger'
                               onPress={() => handleDeleteMaterial(index)}
-                            >
-                              <Ionicons name="trash" size={32} />
-                            </Button>
+                              accessoryLeft={()=> <Ionicons name="trash"  size={32} />}
+                          />
                           </View>
                         ))}
                       </ScrollView>
@@ -304,66 +333,31 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                       value={values.gstNo}
                       onChangeText={handleChange("gstNo")}
                       onBlur={handleBlur("gstNo")}
-                      status={
-                        touched.gstNo && errors.gstNo ? "danger" : "basic"
-                      }
+                      status={touched.gstNo && errors.gstNo ? "danger" : "basic"}
                       caption={
                         touched.gstNo && errors.gstNo ? errors.gstNo : ""
                       }
                     />
 
-                    <View style={styles.buttonContainer}>
-                      <Button style={styles.button} onPress={() => setStep(3)}>
-                        Next
-                      </Button>
-                      <Button
-                        style={[styles.button, styles.cancelButton]}
-                        appearance="ghost"
-                        status="danger"
-                        onPress={() => setStep(1)}
-                      >
-                        Back
-                      </Button>
-                    </View>
-                  </View>
-                )}
-
-                {step === 3 && (
-                  <View>
                     <Select
                       style={styles.input}
                       label="Delivery Option"
                       placeholder="Select delivery option"
-                      value={values.deliveryOption || "Select option"}
+                      selectedIndex={values.deliveryOption}
                       onSelect={(index) => {
-                        const option = deliveryOptions[index.row];
-                        setFieldValue("deliveryOption", option);
+                        setFieldValue("deliveryOption", index);
                       }}
-                      status={
-                        touched.deliveryOption && errors.deliveryOption
-                          ? "danger"
-                          : "basic"
-                      }
                     >
                       {deliveryOptions.map((option, index) => (
                         <SelectItem key={index} title={option} />
                       ))}
                     </Select>
 
-                    {touched.deliveryOption && errors.deliveryOption && (
-                      <Text style={styles.errorText}>
-                        {errors.deliveryOption}
-                      </Text>
-                    )}
-
                     <Datepicker
-                      style={styles.input}
-                      label="Preferred Delivery Date"
+                      label="Date"
                       date={date}
-                      onSelect={(nextDate) => {
-                        setDate(nextDate);
-                        setFieldValue("date", nextDate);
-                      }}
+                      onSelect={setDate}
+                      style={styles.input}
                     />
 
                     <View style={styles.buttonContainer}>
@@ -371,10 +365,8 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                         Submit
                       </Button>
                       <Button
-                        style={[styles.button, styles.cancelButton]}
-                        appearance="ghost"
-                        status="danger"
-                        onPress={() => setStep(2)}
+                        style={styles.button}
+                        onPress={() => setStep(1)}
                       >
                         Back
                       </Button>
@@ -394,90 +386,75 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent:'space-between',
-        marginBottom: 16,
-        marginBottom: 20,
-      },
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
   modalContent: {
-    marginHorizontal: 20,
-    padding: 20,
-    borderRadius: 10,
+    width: "90%",
     backgroundColor: "white",
+    borderRadius: 8,
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
   title: {
+    fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
     textAlign: "center",
   },
   input: {
     marginVertical: 10,
   },
-  label: {
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  checkbox: {
-    marginVertical: 5,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: "transparent",
-  },
-  errorText: {
-    color: "red",
-    marginTop: -10,
-    marginBottom: 10,
-  },
   table: {
-    maxHeight: 200,
     marginVertical: 10,
   },
   tableContent: {
-    flexGrow: 1,
+    paddingBottom: 10,
   },
   tableRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 5,
+    paddingVertical: 5,
   },
   tableCell: {
     flex: 1,
   },
   quantityInput: {
-    flex: 1,
-    marginHorizontal: 5,
+    width: "20%",
   },
   deleteButton: {
-    flex: 1,
-    marginHorizontal: 5,
+    width: "10%",
   },
   customProductContainer: {
     marginVertical: 10,
   },
   customProductRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   customProductInput: {
     flex: 1,
-    marginHorizontal: 5,
   },
   addButton: {
     marginLeft: 10,
   },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
 });
 
 export default QuotationFormDialog;
-
-const HeartIcon = (props) => <Icon {...props} name="heart" />;
