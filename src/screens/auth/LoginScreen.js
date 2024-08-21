@@ -15,7 +15,6 @@ import header_logo from "../../assets/logo/logo.png";
 import CustomButton from "../../components/CustomButton";
 import CustomAlert from "../../components/CustomAlert/CustomAlert";
 import ProgressDialog from "react-native-progress-dialog";
-import InternetConnectionAlert from "react-native-internet-connection-alert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = ({ navigation }) => {
@@ -107,7 +106,6 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <InternetConnectionAlert onChange={(connectionState) => {}}>
       <KeyboardAvoidingView
         // behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
@@ -170,7 +168,6 @@ const LoginScreen = ({ navigation }) => {
         </View>
         <Text>Developed by Goashta Technologies</Text>
       </KeyboardAvoidingView>
-    </InternetConnectionAlert>
   );
 };
 

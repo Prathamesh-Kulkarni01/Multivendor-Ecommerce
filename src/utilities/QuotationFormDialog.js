@@ -31,11 +31,14 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
     };
 
     try {
-      const response = await fetch(`${network.serverip}/products`, headerOptions);
+      const response = await fetch(
+        `${network.serverip}/products`,
+        headerOptions
+      );
       const result = await response.json();
 
       if (result.success) {
-        setMaterials(result.data.map(product => product.title)); // Use product titles as materials
+        setMaterials(result.data.map((product) => product.title)); // Use product titles as materials
         await AsyncStorage.setItem("products", JSON.stringify(result.data));
       } else {
         setError(result.message);
@@ -203,11 +206,13 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                             />
                             <Button
                               // style={styles.deleteButton}
-                              appearance='ghost'
-      status='danger'
+                              appearance="ghost"
+                              status="danger"
                               onPress={() => handleDeleteMaterial(index)}
-                              accessoryLeft={()=> <Ionicons name="trash"  size={32} />}
-                          />
+                              accessoryLeft={() => (
+                                <Ionicons name="trash" size={32} />
+                              )}
+                            />
                           </View>
                         ))}
                       </ScrollView>
@@ -333,7 +338,9 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                       value={values.gstNo}
                       onChangeText={handleChange("gstNo")}
                       onBlur={handleBlur("gstNo")}
-                      status={touched.gstNo && errors.gstNo ? "danger" : "basic"}
+                      status={
+                        touched.gstNo && errors.gstNo ? "danger" : "basic"
+                      }
                       caption={
                         touched.gstNo && errors.gstNo ? errors.gstNo : ""
                       }
@@ -364,10 +371,7 @@ const QuotationFormDialog = ({ isVisible, onClose }) => {
                       <Button style={styles.button} onPress={handleSubmit}>
                         Submit
                       </Button>
-                      <Button
-                        style={styles.button}
-                        onPress={() => setStep(1)}
-                      >
+                      <Button style={styles.button} onPress={() => setStep(1)}>
                         Back
                       </Button>
                     </View>

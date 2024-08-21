@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   buttonContent: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
