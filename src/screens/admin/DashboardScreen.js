@@ -185,7 +185,7 @@ const DashboardScreen = ({ navigation, route }) => {
           <View>
             <Text style={styles.toBarText}>Dashboard</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={()=>navigation.replace('myaccount',{ user })}>
             <Ionicons
               name="person-circle-outline"
               size={30}
